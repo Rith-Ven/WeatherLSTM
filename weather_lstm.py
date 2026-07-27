@@ -26,3 +26,15 @@ print(f"Data successfully loaded. Date range: {data['DATE'].min().strftime('%Y-%
 scaler = MinMaxScaler(feature_range=(0,1)) # Standardizer
 scaled_temp = scaler.fit_transform(data[['TAVG']]) # Finds global min and max and applies scaling x_scaled = (x-x_min) / (x_max - x_min)
 
+# Creating a sequence 
+WINDOW_SIZE = 14 # Model inspects 14 consecutive past days (t-14) to predict temp for day t
+
+# Iterates through scaled dataset to build pairs of input sequences (X) and target outputs (y)
+def create_sequences(dataset, window_size):
+    X, y = [], []
+    for i in range(len(dataset) - window_size):
+        X.append(dataset[i : i + window_size]) # Gets 14 consecutive vals into X
+        y.append(dataset[i + window_size]) # Gets 15th val as label
+    return np.array(X), np.array(y)
+
+X, y = create_sequences(scaled_temp, WINDOW_SIZE)
