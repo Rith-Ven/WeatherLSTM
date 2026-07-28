@@ -81,6 +81,20 @@ y_test_actual = scaler.inverse_transform(y_test)
 mae = np.mean(np.abs(predictions - y_test_actual))
 rmse = np.sqrt(np.mean((predictions - y_test_actual) **2))
 
+
+ 
+# Calculate Mean Absolute Percentage Error
+mape = np.mean(np.abs((y_test_actual - predictions) / y_test_actual)) * 100
+
+# Convert MAPE to Accuracy Percentage
+accuracy_pct = 100 - mape
+
+print("=" * 40)
+print(f"Mean Absolute Error (MAE):    {mae:.2f}°F")
+print(f"Mean Absolute % Error (MAPE): {mape:.2f}%")
+print(f"Model Accuracy Percentage:   {accuracy_pct:.2f}%")
+print("=" * 40)
+
 # **Visualization - renders values + predictions
 plt.figure(figsize = (12, 6))
 plt.plot(dates_test, y_test_actual, label = 'Actual Temperature (°F)', color = '#1f77b4', linewidth = 1.5)
