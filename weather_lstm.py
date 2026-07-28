@@ -38,3 +38,30 @@ def create_sequences(dataset, window_size):
     return np.array(X), np.array(y)
 
 X, y = create_sequences(scaled_temp, WINDOW_SIZE)
+
+# 80/20 train-test split
+train_size = int(len(X) * 0.8)
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+dates_test = data['DATE'].iloc[WINDOW_SIZE + train_size:].reset_index(drop = True) #Gets calendar dates for test predictions for accurate time-series plotting
+
+# Building LSTM Network Architecture
+# Sequential lets data flow through stacked layers
+model = Sequential([ 
+    # Has 64 memory units, outputs a hidden state sequence across 14 time steps, lets next layer analyze temporal patterns
+    LSTM(64,return_sequences = True, input_shape = (WINDOW_SIZE, 1)), 
+    # Zeroes out 20% of network activations during training to mitigate overfitting
+    Dropout(0.2), 
+    # Second layer with 32 memory units, summaries the output across time steps
+    LSTM(32, return_sequences = False), 
+    # Drops 20% when exiting second LSTM
+    Dropout(0.2), 
+    # Fully connected linear project mapping the 32D context vector to 1 continuous numerical prediction
+    Dense(1)])
+
+# Configures Adaptive Moment Estimation optimizer to dynamically compute learning rates for model weights
+# Defines loss function to minimize squared error terms ( 1/n Sum(y - y_hat) ^ 2)
+# Tracks Mean Absolute Error during training
+model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics = ['mae'])
+model.summary()
+
