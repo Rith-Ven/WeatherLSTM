@@ -81,3 +81,18 @@ y_test_actual = scaler.inverse_transform(y_test)
 mae = np.mean(np.abs(predictions - y_test_actual))
 rmse = np.sqrt(np.mean((predictions - y_test_actual) **2))
 
+# **Visualization - renders values + predictions
+plt.figure(figsize = (12, 6))
+plt.plot(dates_test, y_test_actual, label = 'Actual Temperature (°F)', color = '#1f77b4', linewidth = 1.5)
+plt.plot(dates_test, predictions, label = 'LSTM Forecast (°F)', color = '#ff7f0e', linestyle = '--', linewidth = 1.5)
+
+plt.title('Charlotte, NC - Historical Temperature Prediction (LSTM)', fontsize = 14, fontweight = 'bold')
+plt.xlabel('Date', fontsize = 12)
+plt.ylabel('Average Temperature (°F)', fontsize = 12)
+plt.legend(fontsize = 11)
+plt.grid(True, linestyle = ":", alpha = 0.6)
+plt.tight_layout()
+
+plt.savefig('charlotte_weather_plot.png', dpi = 300)
+print("Plot saved as charlotte_weather_plot.png")
+plt.show()
