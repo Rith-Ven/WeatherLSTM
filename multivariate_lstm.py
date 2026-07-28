@@ -11,7 +11,9 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 # **Load data
+print("\nLoading Charlotte weather data...")
 df = pd.read_csv('charlotte-weather.csv')
+
 df['DATE'] = pd.to_datetime(df['DATE'])
 df = df.sort_values('DATE').reset_index(drop = True)
 
@@ -25,11 +27,12 @@ df['Sin_Day'] = np.sin(2 * np.pi * df['DayOfYear'] / 365.25)
 df['Cos_Day'] = np.cos(2 * np.pi * df['DayOfYear'] / 365.25)
 
 FEATURE_COLS = ['TAVG', 'PRCP', 'TMAX', 'TMIX', 'Sin_Day', 'Cos_Day']
-NUM_FEATURES - len(FEATURE_COLS)
+NUM_FEATURES = len(FEATURE_COLS)
 
 # **Feature and Target Scaling - need two scalers now bc X has 6 features while y only have 1
 scaler_X = MinMaxScaler(feature_range = (0,1))
 scaled_features = scaler_X.fit_transform(df[FEATURE_COLS])
+
 scaler_y = MinMaxScaler(feature_range =(0,1))
 scaled_target = scaler_y.fit_transform(df[['TAVG']])
 
@@ -43,3 +46,61 @@ def create_multivariate_sequences(features, target, window_size):
 
 X,y = create_multivariate_sequences(scaled_features, scaled_target, WINDOW_SIZE)
 
+# Train-test split
+train_size = int(len(X) * 0.8)
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+
+dates_test = df['DATE'].iloc[WINDOW_SIZE + train_size:].reset_index(drop = True)
+print(f"Training shape X: {X_train.shape} | Testing shape X: {X_test.shape}")
+
+# Build multivariate lstm model
+model = Sequential([
+    LSTM(64, return_sequences = True, input_shape = (WINDOW_SIZE, NUM_FEATURES)),
+    Dropout(0.2),
+    LSTM(32, return_sequences = False),
+    Dropout(0.2),
+    Dense(1)
+])
+
+model.compile(optimize = 'adam', loss = 'mean_squared_error', metrics = ['mae'])
+model.summary()
+
+# ** Training the model
+print("\nTraining the Multivariate LSTM...")
+history = model.fit(X_train, y_train, epochs = 25, batch_size = 32, validation_data = (X_test, y_test), verbose = 1)
+
+# Evaluating and unscaling predictions
+print("\nGenerating predictions...")
+predictions_scaled = model.predict(X_test)
+
+predictions = scaler_y.inverse_transform(predictions_scaled)
+y_test_actual = scaler_y.inverse_transform(y_test)
+
+mae = np.mean(np.abs(predictions - y_test_actual))
+rmse = np.sqrt(np.mean((predictions - y_test_actual)**2))
+
+mape = np.mean(np.abs((y_test_actual - predictions) / y_test_actual)) * 100
+accuracy_pct = 100 - mape
+
+print("\n" + "=" * 40)
+print(f"Mean Absolute Error (MAE):    {mae:.2f}°F")
+print(f"Mean Absolute % Error (MAPE): {mape:.2f}%")
+print(f"Model Accuracy Percentage:   {accuracy_pct:.2f}%")
+print("=" * 40)
+
+# ** Plot
+plt.figure(figsize=(12, 6))
+plt.plot(dates_test, y_test_actual, label='Actual Temperature (°F)', color='#1f77b4', linewidth=1.5)
+plt.plot(dates_test, predictions, label='Multivariate LSTM Forecast (°F)', color='#ff7f0e', linestyle='--', linewidth=1.5)
+
+plt.title('Charlotte, NC - Multivariate Temperature Prediction (LSTM)', fontsize=14, fontweight='bold')
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Average Temperature (°F)', fontsize=12)
+plt.legend(fontsize=11)
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.tight_layout()
+
+plt.savefig('charlotte_multivariate_weather_plot.png', dpi=300)
+print("Plot saved as 'charlotte_multivariate_weather_plot.png'")
+plt.show()
