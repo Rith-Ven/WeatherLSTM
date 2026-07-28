@@ -22,6 +22,7 @@ df['TAVG'] = (df['TMAX'] + df['TMIN']) / 2.0
 df['PRCP'] = df['PRCP'].fillna(0.0)
 
 # Calendar cyclical feature using sin/cos of day of year
+# Transform 1D day number onto a 2D circle using Sine and Cosine (so Dec 31st and Jan 1st considered "next to each other")
 df['DayOfYear'] = df['DATE'].dt.dayofyear
 df['Sin_Day'] = np.sin(2 * np.pi * df['DayOfYear'] / 365.25)
 df['Cos_Day'] = np.cos(2 * np.pi * df['DayOfYear'] / 365.25)
