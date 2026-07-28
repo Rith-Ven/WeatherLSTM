@@ -30,7 +30,7 @@ Rather than relying on temperature alone, this project uses a **Multivariate LST
 3. **`TMAX` & `TMIN`**: Daily high and low temperatures
 4. **`Sin_Day` & `Cos_Day`**: Sine and cosine transformations of the day of the year
 
-### Why Sine/Cosine Encoding?
+### Sine/Cosine Encoding
 Standard day numbers (1 to 365) make December 31st (365) and January 1st (1) look numerically distant to a neural network, even though they sit right next to each other in real life. Mapping the day of the year onto a 2D unit circle via sine and cosine coordinates ensures the model understands seasonal continuity.
 
 ---
@@ -39,11 +39,12 @@ Standard day numbers (1 to 365) make December 31st (365) and January 1st (1) loo
 
 ```text
 charlotte_weather_lstm/
-│── charlotte-weather.csv            # NOAA historical weather dataset
-│── main.py                         # Full training pipeline script
-│── charlotte_temp_only_plot.png    # Output forecast plot
-│── charlotte_temp_and_prcp_plot.png # Output dual-axis forecast plot with rain overlay
-└── .gitignore                      # Environment and cache ignores
+│── charlotte-weather.csv                       # NOAA historical weather dataset
+│── univariate_weather_lstm.py                  # Full training pipeline script
+│── charlotte_weather_plot.png                  # Output forecast plot
+│── charlotte_multivariate_weather_plot.png     # Multivariate forecast plot without rain overlay
+│── charlotte_temp_and_prcp_plot.png            # Output dual-axis forecast plot with rain overlay
+└── .gitignore                                  # Environment and cache ignores
 ```
 ## Results & Performance
 
