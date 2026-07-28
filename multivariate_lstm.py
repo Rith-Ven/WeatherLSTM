@@ -27,7 +27,7 @@ df['DayOfYear'] = df['DATE'].dt.dayofyear
 df['Sin_Day'] = np.sin(2 * np.pi * df['DayOfYear'] / 365.25)
 df['Cos_Day'] = np.cos(2 * np.pi * df['DayOfYear'] / 365.25)
 
-FEATURE_COLS = ['TAVG', 'PRCP', 'TMAX', 'TMIX', 'Sin_Day', 'Cos_Day']
+FEATURE_COLS = ['TAVG', 'PRCP', 'TMAX', 'TMIN', 'Sin_Day', 'Cos_Day']
 NUM_FEATURES = len(FEATURE_COLS)
 
 # **Feature and Target Scaling - need two scalers now bc X has 6 features while y only have 1
@@ -64,7 +64,7 @@ model = Sequential([
     Dense(1)
 ])
 
-model.compile(optimize = 'adam', loss = 'mean_squared_error', metrics = ['mae'])
+model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics = ['mae'])
 model.summary()
 
 # ** Training the model
@@ -104,4 +104,34 @@ plt.tight_layout()
 
 plt.savefig('charlotte_multivariate_weather_plot.png', dpi=300)
 print("Plot saved as 'charlotte_multivariate_weather_plot.png'")
+plt.show()
+
+# Plot dual-axis temp and rain overlay
+prcp_test = df['PRCP'].iloc[WINDOW_SIZE + train_size:].reset_index(drop = True)
+
+fig, ax1 = plt.subplots(figsize = (12,6))
+# Temperature plot
+ax1.set_xlabel('Date', fontsize = 12)
+ax1.set_ylabel('Average Temperature (°F)', color = '#1f77b4', fontsize = 12)
+line1 = ax1.plot(dates_test, y_test_actual, label = 'Actual Temp (°F)', color = '#1f77b4', linewidth = 1.5)
+line2 = ax1.plot(dates_test, predictions, label = 'Multivariate LSTM Forecast (°F)', color = "#ff7f0e", linestyle = '--', linewidth = 1.5)
+ax1.tick_params(axis = 'y', labelcolor = '#1f77b4')
+ax1.grid(True, linestyle = ':', alpha = 0.6)
+
+# Bar chart overlay
+ax2 = ax1.twinx()
+ax2.set_ylabel('Precipitation (Inches)', color = 'gray', fontsize = 12)
+line3 = ax2.bar(dates_test, prcp_test, label = 'Precipitation (in)', color = 'gray', alpha = 0.3, width = 1.5)
+ax2.tick_params(axis = 'y', labelcolor = 'gray')
+
+# Combine legends
+lines = line1+line2 + [line3]
+labels = [l.get_label() for l in lines]
+ax1.legend(lines, labels, loc = 'lower right', fontsize = 11)
+
+plt.title('Charlotte, NC - Multivariate Forecast with Precipitation Overlay', fontsize = 14, fontweight = 'bold')
+plt.tight_layout()
+
+plt.savefig('charlotte_temp_and_prcp_plot.png', dpi = 300)
+print("Plot saved as 'charlotte_temp_and_prcp_plot.png'")
 plt.show()
