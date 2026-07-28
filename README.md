@@ -44,7 +44,7 @@ charlotte_weather_lstm/
 │── charlotte_temp_only_plot.png    # Output forecast plot
 │── charlotte_temp_and_prcp_plot.png # Output dual-axis forecast plot with rain overlay
 └── .gitignore                      # Environment and cache ignores
-
+```
 ## Results & Performance
 
 * **Model Architecture:** 2-layer stacked LSTM (64 units → 32 units) with Dropout (0.2)
