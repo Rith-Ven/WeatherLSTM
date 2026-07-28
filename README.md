@@ -62,7 +62,12 @@ charlotte_weather_lstm/
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   ```
 3. Install dependencies
+    ```bash
     pip install pandas numpy matplotlib scikit-learn tensorflow
+    ```
 4. Run the model 
+    ```bash
     python multivariate_lstm.py
+    ```
